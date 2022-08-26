@@ -11,18 +11,29 @@ class ProductsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ShopCubit, ShopStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is ShopSuccessChangeFavoritesState) {
+          if (!state.model.status!) {
+            print(state.model.message);
+          }
+        }
+      },
       builder: (context, state) {
         return ConditionalBuilder(
-            condition: ShopCubit.get(context).homeModel != null && ShopCubit.get(context).categoriesModel != null,
-            builder: (context) =>
-                productBuilder(ShopCubit.get(context).homeModel!, ShopCubit.get(context).categoriesModel!),
+            condition: ShopCubit.get(context).homeModel != null &&
+                ShopCubit.get(context).categoriesModel != null,
+            builder: (context) => productBuilder(
+                ShopCubit.get(context).homeModel!,
+                ShopCubit.get(context).categoriesModel!,
+                context),
             fallback: (context) => Center(child: CircularProgressIndicator()));
       },
     );
   }
 
-  Widget productBuilder(HomeModel model,CategoriesModel categoriesModel) => SingleChildScrollView(
+  Widget productBuilder(
+          HomeModel model, CategoriesModel categoriesModel, context) =>
+      SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,9 +62,7 @@ class ProductsScreen extends StatelessWidget {
               height: 10,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -72,7 +81,8 @@ class ProductsScreen extends StatelessWidget {
                     child: ListView.separated(
                         physics: BouncingScrollPhysics(),
                         scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) => buildCategory(categoriesModel.data!.data![index]),
+                        itemBuilder: (context, index) =>
+                            buildCategory(categoriesModel.data!.data![index]),
                         separatorBuilder: (context, index) => SizedBox(
                               width: 10,
                             ),
@@ -105,7 +115,8 @@ class ProductsScreen extends StatelessWidget {
                 childAspectRatio: 1 / 1.72,
                 children: List.generate(
                   model.data!.products.length,
-                  (index) => buildGridProduct(model.data!.products[index]),
+                  (index) =>
+                      buildGridProduct(model.data!.products[index], context),
                 ),
               ),
             ),
@@ -113,7 +124,7 @@ class ProductsScreen extends StatelessWidget {
         ),
       );
 
-  Widget buildGridProduct(ProductModel model) => Container(
+  Widget buildGridProduct(ProductModel model, context) => Container(
         color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,12 +192,22 @@ class ProductsScreen extends StatelessWidget {
                         ),
                       Spacer(),
                       IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: Icon(
-                          Icons.favorite_border_outlined,
-                          size: 14,
+                        onPressed: () {
+                          ShopCubit.get(context).changeFavorites(model.id!);
+                          print(model.id);
+                        },
+                        icon: CircleAvatar(
+                          radius: 15,
+                          backgroundColor:
+                              ShopCubit.get(context).favorites[model.id]!
+                                  ? defaultColor
+                                  : Colors.grey,
+                          child: Icon(
+                            Icons.favorite_border_outlined,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                         ),
-                        onPressed: () {},
                       )
                     ],
                   ),
