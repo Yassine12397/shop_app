@@ -158,7 +158,7 @@ class ProductsScreen extends StatelessWidget {
                 children: [
                   Text(
                     model.name!,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,

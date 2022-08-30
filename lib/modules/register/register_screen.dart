@@ -1,30 +1,28 @@
-
-
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shop_application/layout/shop_app/home_screen.dart';
-import 'package:shop_application/modules/login/cubit/cubit.dart';
-import 'package:shop_application/modules/login/cubit/states.dart';
+import 'package:shop_application/modules/register/cubit/cubit.dart';
+import 'package:shop_application/modules/register/cubit/states.dart';
 import 'package:shop_application/shared/components/component.dart';
 import 'package:shop_application/shared/constant/constant.dart';
 import 'package:shop_application/shared/network/local/cache_helper.dart';
 
-import '../register/register_screen.dart';
-
 // ignore: must_be_immutable
-class ShopLoginScreen extends StatelessWidget {
+class RegisterScreen extends StatelessWidget {
   var formKey = GlobalKey<FormState>();
+  var emailController = TextEditingController();
+  var passwordController = TextEditingController();
+  var nameController = TextEditingController();
+  var phoneController = TextEditingController();
 
+  @override
   Widget build(BuildContext context) {
-    var formKey = GlobalKey<FormState>();
-    var emailController = TextEditingController();
-    var passwordController = TextEditingController();
     return BlocProvider(
-      create: (BuildContext context) => ShopLoginCubit(),
-      child: BlocConsumer<ShopLoginCubit, ShopLoginStates>(
+      create: (BuildContext context) => ShopRegisterCubit(),
+      child: BlocConsumer<ShopRegisterCubit, ShopRegisterStates>(
         listener: (context, state) {
-          if (state is ShopLoginSuccessState) {
+          if (state is ShopRegisterSuccessState) {
             if (state.loginModel.status!) {
               print(state.loginModel.data!.token);
               print(state.loginModel.message!);
@@ -34,11 +32,10 @@ class ShopLoginScreen extends StatelessWidget {
                 /*ShowToast(
                     text: state.loginModel.message!,
                     state: ToastStates.SUCCESS);*/
-                token=state.loginModel.data!.token;
+                token = state.loginModel.data!.token;
                 NavigateAndFinish(context, ShopLayout());
               });
-            }
-            else {
+            } else {
               print(state.loginModel.message);
               /* ShowToast(
                   text: state.loginModel.message!, state: ToastStates.ERROR);*/
@@ -58,14 +55,14 @@ class ShopLoginScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Login',
+                          'Register',
                           style: Theme.of(context)
                               .textTheme
                               .headline4!
                               .copyWith(color: Colors.black),
                         ),
                         Text(
-                          'Login now to browse our hot offers',
+                          'Register now to browse our hot offers',
                           style:
                               Theme.of(context).textTheme.bodyText1!.copyWith(
                                     color: Colors.grey,
@@ -73,6 +70,20 @@ class ShopLoginScreen extends StatelessWidget {
                         ),
                         SizedBox(
                           height: 30,
+                        ),
+                        defaultFormField(
+                            controller: nameController,
+                            type: TextInputType.name,
+                            validate: (String value) {
+                              if (value.isEmpty)
+                                return 'Name must not be empty';
+                              else
+                                return null;
+                            },
+                            label: 'Name',
+                            prefix: Icons.person),
+                        SizedBox(
+                          height: 15,
                         ),
                         defaultFormField(
                             controller: emailController,
@@ -90,15 +101,10 @@ class ShopLoginScreen extends StatelessWidget {
                         ),
                         defaultFormField(
                             controller: passwordController,
-                            isPassword: ShopLoginCubit.get(context).isPassword,
+                            isPassword:
+                                ShopRegisterCubit.get(context).isPassword,
                             type: TextInputType.visiblePassword,
-                            onSubmit: (value) {
-                              if (formKey.currentState!.validate()) {
-                                ShopLoginCubit.get(context).UserLogin(
-                                    email: emailController.text,
-                                    password: passwordController.text);
-                              }
-                            },
+                            onSubmit: (value) {},
                             validate: (String value) {
                               if (value.isEmpty)
                                 return 'Password must not be empty';
@@ -107,45 +113,45 @@ class ShopLoginScreen extends StatelessWidget {
                             },
                             label: 'Password',
                             prefix: Icons.lock_outline,
-                            suffix: ShopLoginCubit.get(context).suffix,
+                            suffix: ShopRegisterCubit.get(context).suffix,
                             suffixPressed: () {
-                              ShopLoginCubit.get(context)
+                              ShopRegisterCubit.get(context)
                                   .changePasswordVisibility();
                             }),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        defaultFormField(
+                            controller: phoneController,
+                            type: TextInputType.phone,
+                            validate: (String value) {
+                              if (value.isEmpty)
+                                return 'Phone number must not be empty';
+                              else
+                                return null;
+                            },
+                            label: 'Phone',
+                            prefix: Icons.phone),
                         SizedBox(
                           height: 30,
                         ),
                         ConditionalBuilder(
-                          condition: state is! ShopLoginLoadingState,
+                          condition: state is! ShopRegisterLoadingState,
                           builder: (context) => defaultButton(
                               function: () {
                                 if (formKey.currentState!.validate()) {
-                                  ShopLoginCubit.get(context).UserLogin(
+                                  ShopRegisterCubit.get(context).UserRegister(
                                       email: emailController.text,
-                                      password: passwordController.text);
+                                      password: passwordController.text,
+                                      name: nameController.text,
+                                      phone: phoneController.text);
                                 }
                               },
-                              text: 'LOGIN',
+                              text: 'REGISTER',
                               isUpperCase: true),
                           fallback: (context) =>
                               Center(child: CircularProgressIndicator()),
                         ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(('Dont\'t you have an account ?')),
-                            TextButton(
-                                onPressed: () {
-                                  NavigateTo(context, RegisterScreen());
-                                },
-                                child: Text(
-                                  'Register Now',
-                                ))
-                          ],
-                        )
                       ],
                     ),
                   ),

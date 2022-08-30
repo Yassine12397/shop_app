@@ -1,25 +1,28 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shop_application/models/login_model.dart';
 import 'package:shop_application/modules/login/cubit/states.dart';
+import 'package:shop_application/modules/register/cubit/states.dart';
 import 'package:shop_application/shared/network/end_points.dart';
 import 'package:shop_application/shared/network/remote/dio_helper.dart';
 
-class ShopLoginCubit extends Cubit<ShopLoginStates> {
-  ShopLoginCubit() : super(ShopLoginInitialState());
+class ShopRegisterCubit extends Cubit<ShopRegisterStates> {
+  ShopRegisterCubit() : super(ShopRegisterInitialState());
 
-  static ShopLoginCubit get(context) => BlocProvider.of(context);
+  static ShopRegisterCubit get(context) => BlocProvider.of(context);
   late ShopLoginModel loginModel;
 
   // ignore: non_constant_identifier_names
-  void UserLogin({
+  void UserRegister({
     required String email,
     required String password,
+    required String name,
+    required String phone,
   }) {
-    emit(ShopLoginLoadingState());
-    DioHelper.postData(url: LOGIN, data: {
+    emit(ShopRegisterLoadingState());
+    DioHelper.postData(url: REGISTER, data: {
+      'name': name,
+      'phone': phone,
       'email': email,
       'password': password,
     }).then((value) {
@@ -27,9 +30,9 @@ class ShopLoginCubit extends Cubit<ShopLoginStates> {
       loginModel = ShopLoginModel.fromJson(value.data);
       print(loginModel.message);
       print(loginModel.data!.email);
-      emit(ShopLoginSuccessState(loginModel));
+      emit(ShopRegisterSuccessState(loginModel));
     }).catchError((error) {
-      emit(ShopLoginErrorState(error.toString()));
+      emit(ShopRegisterErrorState(error.toString()));
       print(error.toString());
     });
   }
@@ -41,6 +44,6 @@ class ShopLoginCubit extends Cubit<ShopLoginStates> {
     isPassword = !isPassword;
     suffix =
         isPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined;
-    emit(ShopPasswordVisibilityState());
+    emit(Shop2PasswordVisibilityState());
   }
 }
